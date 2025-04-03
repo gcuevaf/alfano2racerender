@@ -4,7 +4,9 @@ This windows desktop application converts Alfano data exported from the ADA mobi
 
 ## Description
 
-The Alfano ADA app allows users to record and export data from their karting sessions. This data is typically exported as a ZIP archive containing various files. This application provides a user-friendly graphical interface to extract the relevant data and format it into a CSV file that RaceRender can understand and use for data overlays on your videos.
+The Alfano ADA app allows users to record and export data from their karting sessions. This data is typically exported as a ZIP archive containing various files. This application provides a user-friendly graphical interface to extract the relevant data and format it into a CSV file that RaceRender can understand and use for data overlays on your videos. Example overlay video: https://youtu.be/KZwYxVg7mBY
+
+![Sample Video](https://img.youtube.com/vi/KZwYxVg7mBY/maxresdefault.jpg)
 
 ## Compatibility
 
@@ -26,11 +28,11 @@ Compatible with Alfano 6 and 7
 ## Usage
 
 1.  Launch the `Alfano2RaceRender.exe` application.
-2.  Select the Alfano version
-3.  Click the "Start" button and choose your Alfano ZIP file using the file dialog.
-4.  Enter the desired name and location for the output CSV file.
-6.  The converted CSV file will be saved in the specified location.
-7.  Import the generated CSV file into RaceRender.
+2.  Click the "Start" button and choose your Alfano ZIP file using the file dialog.
+3.  Enter the desired name and location for the output CSV file.
+4.  The converted CSV file will be saved in the specified location.
+5.  Import the generated CSV file into RaceRender.
+6.  Manually sincronize video with input data.
 
 ## Notes
 
