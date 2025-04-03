@@ -32,7 +32,7 @@ Compatible with Alfano 6 and 7
 3.  Enter the desired name and location for the output CSV file.
 4.  The converted CSV file will be saved in the specified location.
 5.  Import the generated CSV file into RaceRender.
-6.  Manually sincronize video with input data.
+6.  Manually synchronize video with input data.
 
 ## Notes
 
