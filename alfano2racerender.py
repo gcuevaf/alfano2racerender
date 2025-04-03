@@ -18,7 +18,7 @@ def extract_lap_from_filename_section(filename):
         return parts[1]  # Extract content between the second pair of '_'
     return filename  # Fallback to original filename if format is unexpected
 
-def transform(selected_alfano,include_partials,zip_path,master_file,input_files, output_csv):
+def transform(include_partials,zip_path,master_file,input_files, output_csv):
     try:
         # Create a dictionary to map (Lap, Partiel) to Time Partiel values
         time_partiel_mapping = {}
@@ -39,7 +39,7 @@ def transform(selected_alfano,include_partials,zip_path,master_file,input_files,
                         df2 = pd.read_csv(csv_data_io)
                         best_lap_time = (df2["time lap"].min())/1000
                         print(f"Best Lap Time: {best_lap_time}")
-                        partial_columns = [col for col in df2.columns if "time partiel" in col]
+                        partial_columns = [col for col in df2.columns if "time partiel" in col and df2[col].iloc[0] != 0]
                         total_partials = len(partial_columns)
                         total_laps = len(df2["lap"])
                         print(f"Total track partials: {total_partials}")
@@ -66,12 +66,7 @@ def transform(selected_alfano,include_partials,zip_path,master_file,input_files,
             for lap_file in input_files:
                 with zip_ref.open(lap_file) as f:
                     df = pd.read_csv(f)
-                    if(selected_alfano == 'Alfano 6'):
-                        df['Time'] = [round(i * 0.1, 1) for i in range(len(df))]
-                    elif(selected_alfano == 'Alfano 7'):
-                        df['Time'] = [round(i * 0.04, 2) for i in range(len(df))]
-                    else:
-                        raise Exception("Device not supported")
+                    df['Time'] = [round(i * 0.1, 1) for i in range(len(df))]
                     col = df.pop('Time')
                     df.insert(0,'Time',col)
                     
@@ -96,6 +91,8 @@ def transform(selected_alfano,include_partials,zip_path,master_file,input_files,
                         df['MPH'] = (df['Speed GPS'] * 0.621371).round(2)
                     if 'Speed rear' in df.columns:
                         df['Speed rear'] = (df['Speed rear'] / 10).round(2)
+                    if 'Speed GPS 25Hz' in df.columns:
+                        df['Speed GPS 25Hz'] = (df['Speed GPS 25Hz'] / 10).round(2)
                     if 'Gf. X' in df.columns:
                         df['Gf. X'] = ((df['Gf. X']/100)-9.8).round(2)* -1
                         df.rename(columns={'Gf. X': 'Y'}, inplace=True)
@@ -126,7 +123,7 @@ def transform(selected_alfano,include_partials,zip_path,master_file,input_files,
                             df["Previous Partiel Time"] = df.apply(lambda row: time_partiel_mapping.get((int(row["Lap"]), int(row["Partiel"]) - 1), None) 
                                                                     if row["Partiel"] > 1 else time_partiel_mapping.get((int(row["Lap"]) - 1, total_partials), None), axis=1)
                             df["Best Previous Partiel Time"]= df.apply(lambda row: best_partiel_mapping.get(( int(row["Partiel"]) - 1), None)
-            if row["Partiel"] > 1 else best_partiel_mapping.get((6), None), axis=1)
+            if row["Partiel"] > 1 else best_partiel_mapping.get((3), None), axis=1)
                             df["Previous Partiel Difference With Best"] = (df["Previous Partiel Time"]-df["Best Previous Partiel Time"]).round(2)
             
                     dataframes.append(df)
@@ -140,9 +137,7 @@ def transform(selected_alfano,include_partials,zip_path,master_file,input_files,
         messagebox.showerror("Error", str(e))
 
 def select_files():
-    selected_alfano = selected_option.get()
     include_partials = partials_checkbox.get()
-    print(f"Selected Dropdown: {selected_alfano}")
     print(f"Partials Checked: {include_partials}")
 
     zip_path = filedialog.askopenfilename(filetypes=[("Zip files", "*.zip")])
@@ -158,7 +153,7 @@ def select_files():
                 return
         save_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")])
         if save_path:
-            transform(selected_alfano,include_partials,zip_path,master_file_path,lap_file_paths, save_path)
+            transform(include_partials,zip_path,master_file_path,lap_file_paths, save_path)
     except Exception as e:
         messagebox.showerror("Error", f"Failed to read ZIP file: {e}")
 
@@ -167,30 +162,18 @@ root = tk.Tk()
 if os.path.exists('icon.ico'):
     root.iconbitmap('icon.ico')
 root.title("Alfano to RaceRender converter by Full Send Racing")
-root.geometry("500x250")
-
-# Dropdown options
-supported_alfanos = ["Alfano 6", "Alfano 7"]
-
-# Create a StringVar to hold the selected value
-selected_option = tk.StringVar()
-
-dropdown = ttk.Combobox(root, textvariable=selected_option, values=supported_alfanos, state="readonly")
-dropdown.pack(pady=5)
-
-# Set default value
-dropdown.current(0)
+root.geometry("450x220")
 
 # Checkbox variable
 partials_checkbox = tk.BooleanVar()
 partials_checkbox.set = True
 
+tk.Label(root, text="1. Select zip file generated from the Alfano ADA app.").pack(pady=10)
+tk.Label(root, text="2. Select where to create output file.").pack(pady=10)
+
 # Create a Checkbox
 checkbox = tk.Checkbutton(root, text="Add Partial Sector Times", variable=partials_checkbox)
 checkbox.pack(pady=5)
-
-tk.Label(root, text="1. Select zip file generated from the Alfano ADA app.").pack(pady=10)
-tk.Label(root, text="2. Select where to create output file.").pack(pady=10)
 
 tk.Button(root, text="Start", command=select_files).pack(pady=10)
 
